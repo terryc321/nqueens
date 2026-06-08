@@ -93,11 +93,13 @@ conflict there - time is lookup in 2d array
 ;; all no squares get removed
 ;; scan through board to find queens
 ;; for each queen - fire off spray-no x y sz 
-(define (queen-n n i sz sk qlim)  
+(define (queen-n n i sz sk qlim exit)  
   (cond
    ((> n qlim)
     (format #t "Solution : ~a~%" sk)
-    (show-board sz))
+    (show-board sz)
+    (exit #t)
+    )
    ((> i sz) #f)
    (#t ;; can i place a queen at (n,i) and not be in conflict with sk
     (let ((elem (array-ref *board* i n)))
@@ -112,7 +114,7 @@ conflict there - time is lookup in 2d array
 	;; == debug ===
 	;;(show-board sz)
 	;; advance next row 
-	(queen-n (+ n 1) 1 sz (cons (list i n) sk) qlim)
+	(queen-n (+ n 1) 1 sz (cons (list i n) sk) qlim exit)
 	;; remove queen
 	(array-set! *board* #f i n )
 	;; remove no s from board
@@ -121,12 +123,12 @@ conflict there - time is lookup in 2d array
 	(map (lambda (pt)
 	       (bind (x y) pt
 		     (spray-no! x y sz))) sk))	
-      (queen-n n (+ i 1) sz sk qlim)))))
+      (queen-n n (+ i 1) sz sk qlim exit)))))
 
 
 
 
-(define (find-solutions size-board)
+(define (find-solutions size-board exit)
   (reset-board)
   (show-board size-board)
   (let* (
@@ -135,12 +137,13 @@ conflict there - time is lookup in 2d array
 	 (queens '())
 	 (first-column 1)
 	 )
-    (queen-n first-queen first-column size-board queens last-queen)))
+    (queen-n first-queen first-column size-board queens last-queen exit)))
 
 
 
 (define (demo)
-  (find-solutions 8))
+  (call/cc (lambda (exit)
+	     (find-solutions 32 exit))))
 
 
 (demo)
