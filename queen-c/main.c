@@ -1,7 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdint.h>
+// uint64_t requires stdint
+// 1 ULL one unsigned long long 64 bits 
 
 // can we show a grid
 // how do we arrange for an 8x8 grid ?
@@ -22,20 +24,19 @@ static void dominate(int queen , int x , int y);
 static void un_dominate(int queen , int x , int y);
 static void brute(int nqueen);
 
-
 // an 8x8 grid initially 
-#define SIZE  8
+#define SIZE  40
 
 #define CUSHION 3
 #define WIDTH  (SIZE + CUSHION)
 #define HEIGHT (SIZE + CUSHION)
 
-static int grid[HEIGHT][WIDTH];
+static uint64_t grid[HEIGHT][WIDTH];
 
 // just need to know what column the nth queen is on  , since its row is fixed it on nth row always
 static int queen_column[WIDTH];
 
-
+static int solution_no = 0;
 
 static void show_grid(){
   int i =0;
@@ -66,35 +67,45 @@ static void dominate(int queen , int x , int y) {
   int i = 0;
   int x2 = 0;
   int y2 = 0;    
-  // OR'ed sets that bit 
+
+  // actually thinking about it - increasing Y is south , decreasing Y is north
+  // but hey.
+  
+  // OR'ed sets that bit   
+  grid[y][x] |= (1ULL << queen) ;      
+  
   for (i = 1; i <= SIZE ; i ++){
+    x2 = x ; y2 = y + i ; // north 
+    if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
+      grid[y2][x2] |= (1ULL << queen) ;      
+    }
     x2 = x + i ; y2 = y + i ; // north east  
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x + i ; y2 = y ; // east 
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x + i ; y2 = y - i ; // south east
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x ; y2 = y - i ; // south 
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y - i ; // south west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y ; // west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y + i ; // north west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] |= (1u << queen) ;      
+      grid[y2][x2] |= (1ULL << queen) ;      
     }    
   }
 }
@@ -105,7 +116,7 @@ static void un_dominate(int queen , int x , int y) {
   int y2 = 0;
 
   // we can label this grid square at (y,x) Y X as this queen was here 
-  grid[y][x] = grid[y][x] | (1u << queen) ;
+  grid[y][x] &= ~(1ULL << queen) ;
   
   // although we are placing queens on independent rows never going to have two queens on same row
   // so we could in theory eliminate bit settings for East and West entirely
@@ -118,33 +129,37 @@ static void un_dominate(int queen , int x , int y) {
   // or simply memoise squares that would conflict if
    
   for (i = 1; i <= SIZE ; i ++){
+    x2 = x ; y2 = y + i ; // north
+    if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
+      grid[y2][x2] &= ~(1ULL << queen) ;      
+    }
     x2 = x + i ; y2 = y + i ; // north east  
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x + i ; y2 = y ; // east 
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x + i ; y2 = y - i ; // south east
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x ; y2 = y - i ; // south 
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y - i ; // south west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y ; // west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }
     x2 = x - i ; y2 = y + i ; // north west
     if (x2 >= 1 && x2 <= SIZE && y2 >= 1 && y2 <= SIZE){
-      grid[y2][x2] &= ~(1u << queen) ;      
+      grid[y2][x2] &= ~(1ULL << queen) ;      
     }    
   }
 }
@@ -175,7 +190,8 @@ static void show_solution_grid(){
 
 static void brute(int nqueen){
   if (nqueen > SIZE){
-    printf("\npotential solution\n");
+    solution_no ++; 
+    printf("\nsolution [ %d ] for nqueens = [%d]\n",solution_no , SIZE);
     int nq = 0;
     // nth queen
     printf("[");
@@ -186,7 +202,12 @@ static void brute(int nqueen){
 	printf(",");
       }
     }
-    printf("]\n");    
+    printf("]\n");
+    show_solution_grid();
+    printf("\n");
+
+    // just take any solution 
+    exit(0);
     return ;
   }
   int i = 0;
@@ -196,6 +217,9 @@ static void brute(int nqueen){
       // place queen 
       dominate( nqueen , i , nqueen);
       queen_column[nqueen] = i;
+
+      //show_grid();
+      //getchar(); // wait for key press 
       
       // go try place next queen 
       brute(nqueen+1);
@@ -207,11 +231,60 @@ static void brute(int nqueen){
   }
 }
 
+void test1(){  
+  clear_grid();
+  dominate(1,1,1);
+  show_grid();
+  printf("... press a key to continue ... \n");
+  getchar();  
+}
 
+void test2(){  
+  clear_grid();
+  dominate(1,8,1);
+  show_grid();
+  printf("... press a key to continue ... \n");
+  getchar();  
+}
+
+void test3(){  
+  clear_grid();
+  dominate(1,1,8);
+  show_grid();
+  printf("... press a key to continue ... \n");
+  getchar();  
+}
+
+void test4(){  
+  clear_grid();
+  dominate(1,8,8);
+  show_grid();
+  printf("... press a key to continue ... \n");
+  getchar();  
+}
 
 
 int main(){
+  /*
   printf("my first c program\n");
+
+  
+  test1();
+  test2();
+  test3();
+  test4();
+  */
+  // clean slate
+  clear_grid();
+  solution_no = 0;
+  
+  
+  /*
+  int a = 0;
+  a |= (1ULL << 3);
+  printf("OR with queen 3 : %d",a);
+  a &= ~(1ULL << 3);
+  printf("AND ~ with queen 3 : %d",a);
 
   printf("random uninitialised grid\n");
   show_grid();
@@ -224,9 +297,11 @@ int main(){
   printf("cleared grid\n");
   clear_grid();
   show_grid();
+  */
+
 
   printf("starting search\n");
-  brute(1,1);
+  brute(1);
   
   
     
