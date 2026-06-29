@@ -1,90 +1,55 @@
 
-(*
-  chatgpt nqueens assisted solution
-  
-         column 
-         0  1  2  3
-  row 0  .  .  .  .
-  row 1  .  .  .  . 
-  row 2  .  .  .  .
-  row 3  .  .  .  .
+
+open Domainslib
+
+let found = Atomic.make false
+let solution = Atomic.make None
 
 
-  #show Int;;
-  lsl logical shift left
-  lsr logical shift right
-  land logical and
-  lor  logical or
-  lnot 
-  
-  *)
 
-type state =
+type task =
 {
-    columns : int;
-    diag1   : int;
-    diag2   : int;
+  row     : int;
+  path    : int list;
+  columns : int;
+  diag1   : int;
+  diag2   : int;
 }
 
-let size_board = 4
 
-let mask = (1 lsl size_board) - 1
-
-let init_board : state = {columns = 0 ; diag1 = 0 ; diag2 = 0 }
-
-let get_columns (board : state) : int =  board.columns
-
-let get_diag1 (board : state) : int =  board.diag1
-
-let get_diag2 (board : state) : int =  board.diag2
-
-
-  (*
-let available (board : state) : int =
-  lnot (board.columns lor board.diag1 lor board.diag2) land mask
-
-let rec search (row : int) (board : state) : state =
-  if row >= size_board then
-    (*found one complete solution*)
-    board
+let rec bit_to_col bit col =
+  if bit = 1 then
+    col
   else
-    (*search all legal columns in this row *)
-    board
-    *)
+    bit_to_col (bit lsr 1) (col + 1)
 
 
-let n = size_board 
+let initial_tasks n =
+  let mask = (1 lsl n) - 1 in
 
-exception Found of (int list)
+  let rec loop available tasks =
+    if available = 0 then
+      List.rev tasks
+    else
+      let bit = available land (-available) in
+      let available = available land (available - 1) in
 
-let rec search n row path columns diag1 diag2 =
-  if row = n then
-    raise (Found path)
-  else
-    let mask = (1 lsl n) - 1 in
-    let available =
-      lnot (columns lor diag1 lor diag2) land mask
-    in
-    let rec bit_index bit i =
-      if bit = 1 then i
-      else bit_index (bit lsr 1) (i + 1)
-    and loop available =
-      if available = 0 then
-        0
-      else
-        let bit = available land (-available) in
-        let available = available land (available - 1) in
-	let col = bit_index bit 0 in
-        let count =
-          search n (row + 1)
-	    (col :: path)
-            (columns lor bit)
-            ((diag1 lor bit) lsl 1)
-            ((diag2 lor bit) lsr 1)
-        in
-        count + loop available
-    in
-    loop available
+      let col = bit_to_col bit 0 in
+
+      let task =
+      {
+        row = 1;
+        path = [col];
+        columns = bit;
+        diag1 = bit lsl 1;
+        diag2 = bit lsr 1;
+      }
+      in
+
+      loop available (task :: tasks)
+  in
+
+  loop mask []
 
 
 let print_solution sol =
@@ -100,32 +65,131 @@ let print_solution sol =
       print_newline ()
     )
     sol
-    
 
-let example (n : int) =
-  try
-    let row = 0
-                  and columns = 0
-                  and diag1 = 0
-                  and diag2 = 0
-		  and path = []
-       (*search n 0 [] 0 0 0 *)
-    in (let _ = search n row path columns diag1 diag2
-     in  print_solution [])
-  with
-  | Found sol ->
+
+
+let rec search n row path columns diag1 diag2 =
+  if row = n then
+    Some (List.rev path)
+  else
+    let mask = (1 lsl n) - 1 in
+    let available =
+      lnot (columns lor diag1 lor diag2) land mask
+    in
+
+    let rec loop available =
+      if available = 0 then
+        None
+      else
+        let bit = available land (-available) in
+        let remaining = available land (available - 1) in
+
+        let col = bit_to_col bit 0 in
+
+        match search
+                n
+                (row + 1)
+                (col :: path)
+                (columns lor bit)
+                ((diag1 lor bit) lsl 1)
+                ((diag2 lor bit) lsr 1)
+        with
+        | Some solution ->
+            Some solution
+        | None ->
+            loop remaining
+    in
+
+    loop available
+
+
+
+let solve_parallel n =
+  let tasks = Array.of_list (initial_tasks n) in
+
+  let pool =
+    Task.setup_pool
+      ~num_domains:(Domain.recommended_domain_count () - 1)
+      ()
+  in
+
+  let result =
+    Task.run pool (fun () ->
+      Task.parallel_find
+	~chunk_size:1
+	~start:0
+	~finish:(Array.length tasks - 1)
+	~body:(fun i ->
+          let t = tasks.(i) in
+          search
+            n
+            t.row
+            t.path
+            t.columns
+            t.diag1
+            t.diag2
+	)
+	pool
+    )
+  in
+
+  Task.teardown_pool pool;
+
+  match result with
+  | None ->
+    print_endline "No solution found."
+  | Some sol ->
     print_solution sol
+
+
+  (*
+let solve_parallel n =
+  let tasks = Array.of_list (initial_tasks n) in
+  let pool =
+    Task.setup_pool
+      ~num_domains:(Domain.recommended_domain_count () - 1)
+      ()
+  in
+
+  Task.run pool (fun () ->
+    Task.parallel_for
+      pool
+      ~start:0
+      ~finish:(Array.length tasks - 1)
+      ~body:(fun i ->
+        let t = tasks.(i) in
+        search
+          n
+          t.row
+          t.path
+          t.columns
+          t.diag1
+          t.diag2
+      )
+  );
+
+  Task.teardown_pool pool;
+
+  match Atomic.get solution with
+  | None ->
+      print_endline "No solution found."
+  | Some sol ->
+    print_solution sol
+    *)
     
 
-      (* here is the runner *)
+
 let () =
   if Array.length Sys.argv <> 2 then begin
     Printf.eprintf "Usage: %s <n>\n" Sys.argv.(0);
     exit 1
   end;
 
-  let n = int_of_string Sys.argv.(1) in
+  let n =
+    try int_of_string Sys.argv.(1)
+    with Failure _ ->
+      Printf.eprintf "Error: '%s' is not an integer.\n" Sys.argv.(1);
+      exit 1
+  in
 
-  Printf.printf "Solving %d-Queens\n" n;
-
-  example n
+  solve_parallel n

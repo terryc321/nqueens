@@ -1,4 +1,4 @@
 (executable
  (public_name queen-ocaml)
  (name main)
- (libraries queen_ocaml))
+ (libraries queen_ocaml domainslib))
