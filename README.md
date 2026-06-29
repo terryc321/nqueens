@@ -44,45 +44,71 @@ to say there is only one queen in row one , we also use suffix zero 0 to mean no
 for each clause
 
 ```
-c one queen per row only
--1 -2 -3 -4 0 
--5 -6 -7 -8 0
--9 -10 -11 -12 0
--13 -14 -15 -16 0
+c row1 must have a queen 
+1 2 3 4 0
+5 6 7 8 0
+9 10 11 12 0
+13 14 15 16 0
+```
+
+```
+c one queen per row only - cannot both be 
+c 1 x 2 .. n 
+c 2 x 3 .. n
+c 3 x 4 .. n etc ..
+-1 -2 0
+-1 -3 0
+-1 -4 0
+-2 -3 0
+-2 -4 0
+-3 -4 0
+c repeat for { 5 6 7 8 }
+c repeat for { 9 10 11 12 }
+c repeat for { 13 14 15 16 }
 ```
 
 ```
 c similarly one queen per column only
--1 -5 -9 -13 0
--2 -6 -10 -14 0 
--3 -7 -11 -15 0
--4 -8 -12 -16 0
+c for 1 5 9 13 
+-1 -5 0 
+-1 -9 0
+-1 -13 0
+-5 -9 0
+-5 -13 0
+-9 -13 0
+c repeat for { 2 6 10 14 }
+c repeat for { 3 7 11 15 }
+c repeat for { 4 8 12 16 }
 ```
 
 ```
 c only one queen per diagonal , north west - south east diagonals 
-c 13 by itself is okay i presume
-c 4 by itself is okay i presume
--9 -14 0 
--5 -10 -15 0
--1 -6 -11 -16 0
--2 -7 -12 0
--3 -8 0
+c for diagonal containing 1 6 11 16 no two squares can conflict
+-1 -6 0
+-1 -11 0
+-1 -16 0
+-6 -11 0
+-6 -16 0
+-11 -16 0 
+c similarly for every other diagonal
 ```
 
 ```
 c only one queen per diagonal , north east diagonals
-c 1 ok
--5 -2 0 
--9 -6 -3 0
--13 -10 -7 -4 0
--14 -11 -8 0
--15 -12 0
-c 16 ok
+c for diagonal containing 4 7 10 13 
+-4 -7 0
+-4 -10 0
+-4 -13 0
+-7 -10 0
+-7 -13 0
+-10 -13 0
+c similarly for every other diagonal 
 ```
 
 have we completely specified the nqueens into propositional logic for a 4x4 board now then ?
 
+for a 40x40 board there are 1600 propositional variables .
+for a 100x100 board there are 10000 variables .
 
 
 
