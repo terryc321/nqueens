@@ -1,0 +1,53 @@
+============================== Mace4 =================================
+Mace4 (64) version 2026-6A, June 2026.
+Process 409697 was started by terry on terry-MS-7D96,
+Mon Jun 29 17:05:52 2026
+The command was "/home/terry/src/Prover9/bin/mace4 -n40 -m1 -f queens.in".
+============================== end of head ===========================
+
+============================== INPUT =================================
+
+% Reading from file queens.in
+
+set(arithmetic).
+    % set(arithmetic) -> clear(lnh).
+    % set(arithmetic) -> assign(selection_order, 0).
+
+    % Declaring Mace4 arithmetic parse types.
+
+formulas(assumptions).
+x != z -> Q(x) != Q(z).
+x != z -> z + -x != Q(z) + -Q(x).
+x != z -> z + -x != Q(x) + -Q(z).
+end_of_list.
+    % assign(domain_size, 40) -> assign(start_size, 40).
+    % assign(domain_size, 40) -> assign(end_size, 40).
+
+% From the command line: assign(domain_size, 40).
+
+% From the command line: assign(max_models, 1).
+
+============================== end of input ==========================
+
+============================== PROCESS NON-CLAUSAL FORMULAS ==========
+
+% Formulas that are not ordinary clauses:
+1 x != z -> Q(x) != Q(z) # label(non_clause).  [assumption].
+2 x != z -> z + -x != Q(z) + -Q(x) # label(non_clause).  [assumption].
+3 x != z -> z + -x != Q(x) + -Q(z) # label(non_clause).  [assumption].
+
+============================== end of process non-clausal formulas ===
+
+============================== CLAUSES FOR SEARCH ====================
+
+formulas(mace4_clauses).
+x = y | Q(x) != Q(y).
+x = y | Q(x) + -Q(y) != x + -y.
+x = y | Q(y) + -Q(x) != x + -y.
+end_of_list.
+
+============================== end of clauses for search =============
+
+% There are no natural numbers in the input.
+
+============================== DOMAIN SIZE 40 ========================

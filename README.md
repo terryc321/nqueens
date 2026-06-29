@@ -3,6 +3,89 @@
 this was all sparked from not being able to complete haskell - mooc - fi set 9b.hs exercise on nqueen 
 could not understand the final exercise 
 
+```
+queen-c 
+c implementation of an nqueens 
+
+queen-ocaml 
+ocaml implementation of nqueens ,uses multicore but not really sure
+if it makes any difference whatever 
+
+queen-ladr-prover9-mace4 
+uses mace4 to try to build a model 
+
+queen-cnf 
+try using propositional logic and sat solver minisat , needs translation logic into clause normal form,
+explosion of terms
+
+```
+## clause normal form 
+
+DIMACS cnf format 
+
+for propositional logic variables 1 .. n^2 
+
+if we say 1 represents there is a queen at square 1 , and -1 to mean there is no queen there
+
+```
+1   2  3  4
+5   6  7  8
+9  10 11 12
+13 14 15 16
+```
+
+aside for comments in .dnf file we can write comments prefix entire line with letter c
+
+```
+c this is a comment 
+```
+
+to say there is only one queen in row one , we also use suffix zero 0 to mean nothing more to follow
+for each clause
+
+```
+c one queen per row only
+-1 -2 -3 -4 0 
+-5 -6 -7 -8 0
+-9 -10 -11 -12 0
+-13 -14 -15 -16 0
+```
+
+```
+c similarly one queen per column only
+-1 -5 -9 -13 0
+-2 -6 -10 -14 0 
+-3 -7 -11 -15 0
+-4 -8 -12 -16 0
+```
+
+```
+c only one queen per diagonal , north west - south east diagonals 
+c 13 by itself is okay i presume
+c 4 by itself is okay i presume
+-9 -14 0 
+-5 -10 -15 0
+-1 -6 -11 -16 0
+-2 -7 -12 0
+-3 -8 0
+```
+
+```
+c only one queen per diagonal , north east diagonals
+c 1 ok
+-5 -2 0 
+-9 -6 -3 0
+-13 -10 -7 -4 0
+-14 -11 -8 0
+-15 -12 0
+c 16 ok
+```
+
+have we completely specified the nqueens into propositional logic for a 4x4 board now then ?
+
+
+
+
 ## ideas 
 
 how might we think about placing queens ? 
