@@ -1,8 +1,22 @@
 # nqueens
 
+hypothesis
+
+a randomly generated board of queens with adjustments is faster way to find a solution than a brute force
+serial trial and error approach , discuss.
+
+lets build a randomly generated board and see if it can find a solution to an nqueen puzzle . 
+
+lets for first attempt just do no adjustment at all , see if it solves it by chance, what are probabilities of doing this ?
+
+
+
+
 # scala3 
 
-2000x2000 nqueens solved ! 
+3000x3000 nqueens solved ! 
+
+2000x2000 nqueens solved
 
 just a question of how much memory can squeeze in ?
 
