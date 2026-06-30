@@ -15,14 +15,72 @@ c comment lines start with c lowercase ?
 decide what is the size of n queens board you are going to create
 for each clause we simply cons- onto *clauses* , this way we 
 
+
+# give sbcl 16 gigs to do this 
+$ sbcl --dynamic-space-size 16000
+> (load "queens.lisp")
+T
+> (queens::generate-nqueen-out 300 "300queen.cnf")
+NIL
+
+
+
 |#
 
 (defparameter *stream* t) 
-(defparameter *clause-count* nil)
+(defparameter *clause-count* 0)
 (defparameter *clauses* nil)
 (defparameter *variables* nil)
 (defparameter *nqueen* nil)
 (defparameter *board* nil)
+
+#|
+example - generate 500x500 clause normal form for 500 nqueens 
+(queens::generate-nqueen-out 500 "500queen.cnf")
+
+simply generating the propositional logic puzzle takes 38 seconds ! 
+
+(time (generate-nqueen-out 500 "500queen.cnf"))
+Evaluation took:
+  37.202 seconds of real time
+  37.164928 seconds of total run time (36.408078 user, 0.756850 system)
+  [ Real times consist of 0.060 seconds GC time, and 37.142 seconds non-GC time. ]
+  [ Run times consist of 0.063 seconds GC time, and 37.102 seconds non-GC time. ]
+  99.90% CPU
+  137,143,776,320 processor cycles
+  10,106,871,216 bytes consed
+
+
+need to move line p cnf 250000 207834000
+to top of 500queen.cnf file
+
+since we dont know how many clauses there are until we have generated the file!
+
+1000x1000 nqueens  -- then still need to move last line p cnf X Y  to top of file
+p cnf 1000000 1664668000
+
+echo "p cnf 1000000 1664668000" > 1000queen2.cnf
+cat 1000queen.cnf >> 1000queen2.cnf
+mv -v 1000queen2.cnf 1000queen.cnf
+
+
+
+CL-USER> (time (queens::generate-nqueen-out 1000 "1000queen.cnf"))
+Evaluation took:
+  288.876 seconds of real time
+  288.808333 seconds of total run time (283.794706 user, 5.013627 system)
+  [ Real times consist of 0.415 seconds GC time, and 288.461 seconds non-GC time. ]
+  [ Run times consist of 0.411 seconds GC time, and 288.398 seconds non-GC time. ]
+  99.98% CPU
+  1,064,895,688,838 processor cycles
+  80,428,075,600 bytes consed
+  
+NIL
+
+
+
+|#
+
 
 (defun generate-nqueen-out (n filename)
   (with-open-file (*stream* filename :direction :output :if-exists :supersede)
@@ -33,16 +91,32 @@ for each clause we simply cons- onto *clauses* , this way we
 (defun generate-nqueen (n)
   (let ((*nqueen* n)
 	(*variables* (* n n))
+	(*clause-count* 0)
 	(*clauses* nil))
+    ;; generate board just translates (x,y) pair into single integer
     (generate-board)
+
     (generate-clauses)
-    (let ((*clause-count* (length (remove-if (lambda (x) (equalp (car x) "c")) *clauses*))))
-      (print-header)
-      (print-clauses)
-      )))
+    (print-header)
+    
+    ;; (let ((*clause-count* (length (remove-if (lambda (x) (equalp (car x) "c")) *clauses*))))
+    ;;   (print-header)
+    ;;   (print-clauses)
+    ;;   )
+    )
+  )
 
 (defun print-header ()
-  (format *stream*  "p cnf ~a ~a~%" *variables* *clause-count*))
+  (format *stream*  "c you need to manually create a p cnf header")
+  (format *stream*  "c p cnf ~a ~a~%" *variables* *clause-count*))
+
+
+(defun print-clause (clause)
+  (when (not (equalp (car clause) "c")) (incf *clause-count*))
+  (dolist (c clause)
+    (format *stream*  "~a " c))
+  (format *stream*  "~%"))
+
 
 
 (defun print-clauses ()
@@ -80,7 +154,10 @@ for each clause we simply cons- onto *clauses* , this way we
   )
 
 (defun add-clause (c)
-  (setq *clauses* (cons c *clauses*)))
+  (print-clause c))
+
+;; we do not stack up clauses now !
+;; (setq *clauses* (cons c *clauses*)))
 
 
 ;; we want to pair down each combination and make the negative

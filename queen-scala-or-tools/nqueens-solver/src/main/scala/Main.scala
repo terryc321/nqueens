@@ -2,6 +2,7 @@ import com.google.ortools.Loader
 import com.google.ortools.sat.{CpModel, CpSolver, CpSolverStatus, IntVar, LinearArgument, LinearExpr}
 import scala.reflect.ClassTag
 
+
 object Main:
   def main(args: Array[String]): Unit =
     // Initialize the underlying native C++ binaries

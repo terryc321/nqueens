@@ -1,5 +1,67 @@
 # nqueens
 
+# scala3 
+
+2000x2000 nqueens solved ! 
+
+just a question of how much memory can squeeze in ?
+
+scala3 using google or-tools 
+
+
+
+see queen-scala-or-tools/nqueens-solver
+
+```
+sbt new scala/scala3.g8
+the terminal will prompt you for a name (e.g., nqueens-solver).
+
+cd nqueens-solver
+
+add dependencies to build.sbt
+libraryDependencies += "com.google.ortools" % "ortools-java" % "9.12.4544"
+
+```
+
+the latest winner so far is cryptominisat5 
+
+target is a 1000x1000 nqueens puzzle , the large file generated in CNF format is very very large
+
+successs ! memory usage around 35 gig for 1000 nqueens puzzle 
+
+can we go larger ? 
+
+
+# enable swap
+
+created 64 gig of swap to see if computation can proceed 
+
+```
+# 1. Allocate the space (64 GB)
+sudo dd if=/dev/zero of=/swapfile_large bs=1G count=64 status=progress
+
+# 2. Set the correct permissions for security
+sudo chmod 600 /swapfile_large
+
+# 3. Set up the file as Linux swap area
+sudo mkswap /swapfile_large
+
+# 4. Enable the swap file immediately
+sudo swapon /swapfile_large
+```
+
+and to disable it
+
+```
+# 1. Disable the temporary swap
+sudo swapoff /swapfile_large
+
+# 2. Delete the file from your drive
+sudo rm /swapfile_large
+```
+
+## directory structure 
+
 this was all sparked from not being able to complete haskell - mooc - fi set 9b.hs exercise on nqueen 
 could not understand the final exercise 
 
