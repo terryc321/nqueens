@@ -245,6 +245,19 @@ given a board size - create bd  "
 	  (loopy (+ y 1))))
       queens)))
 
+
+;; we can get a list of primes from generate-primes.scm in same directory ai slop at its finest
+(define test-staircase-for-primes
+  (lambda (primes)
+    (set! primes (filter (lambda (v) (not (or (= v 2)(= v 3)))) primes))
+    (map (lambda (p)
+	   (let ((bd (staircase p)))
+	     (cond
+	      ((solved? bd) (format #t "true for nqueens ~a~%" p))
+	      (else (format #t "counter-example ~a ~%" p)
+		    (error "counter-example")))))
+	 primes)))
+
 ;; so why ? 
 ;; staircase on prime 5 7 11 13 17 ... all lead to solved n queens
 ;; picked large prime 9973 from google --- checked --- yes .. it works !!
@@ -387,6 +400,19 @@ Q..........
 ......Q....
 .Q.........
 .......Q...
+
+
+
+{9x9} ((7 1) (9 2) (1 3) (3 4) (5 5) (8 6) (2 7) (4 8) (6 9))
+......Q..
+........Q
+Q........
+..Q......
+....Q....
+.......Q.  << is this the divider?
+.Q.......
+...Q.....
+.....Q...
 
 
 
